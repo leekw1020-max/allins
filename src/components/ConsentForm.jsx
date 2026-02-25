@@ -55,7 +55,6 @@ export default function ConsentForm() {
         if (!formData.address.trim()) newErrors.address = '주소를 검색해주세요.';
         if (!agreed) {
             newErrors.agreed = '개인정보 수집 및 이용에 동의해야 합니다.';
-            alert('개인정보 수집 및 이용 동의(필수)에 체크해주세요.');
         }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -73,12 +72,16 @@ export default function ConsentForm() {
                 // Fallback for demo when Supabase is not configured
                 console.warn('Supabase not configured. Mock submission:', formData);
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                setSubmitStatus('success');
+
+                alert('개인정보 수집 및 이용 동의가 완료되었습니다');
+                setFormData({ name: '', phone: '', zonecode: '', address: '', detailAddress: '' });
+                setAgreed(false);
+                setMarketingAgreed(false);
                 return;
             }
 
             const { error } = await supabase
-                .from('consents')
+                .from('customers')
                 .insert([
                     {
                         name: formData.name,
@@ -92,32 +95,20 @@ export default function ConsentForm() {
                 ]);
 
             if (error) throw error;
-            setSubmitStatus('success');
+
+            alert('개인정보 수집 및 이용 동의가 완료되었습니다');
+            setFormData({ name: '', phone: '', zonecode: '', address: '', detailAddress: '' });
+            setAgreed(false);
+            setMarketingAgreed(false);
         } catch (err) {
             console.error('Submission error:', err);
-            setSubmitStatus('error');
+            setSubmitStatus(err.message || '오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    if (submitStatus === 'success') {
-        return (
-            <div className="w-full max-w-md mx-auto bg-white min-h-screen sm:min-h-0 sm:mt-10 sm:rounded-xl sm:shadow-lg flex flex-col items-center justify-center p-8 text-center">
-                <div className="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <CheckSquare size={32} />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">제출 완료</h2>
-                <p className="text-gray-600 mb-8">개인정보 제공 동의가 성공적으로 완료되었습니다. 감사합니다.</p>
-                <button
-                    onClick={() => window.location.reload()}
-                    className="bg-navy-600 hover:bg-navy-800 text-white font-medium py-3 px-6 rounded-lg transition-colors"
-                >
-                    돌아가기
-                </button>
-            </div>
-        );
-    }
+
 
     return (
         <div className="w-full max-w-md mx-auto bg-white min-h-screen sm:min-h-0 sm:mt-10 sm:rounded-xl sm:shadow-lg overflow-hidden flex flex-col">
@@ -242,14 +233,14 @@ export default function ConsentForm() {
                     </div>
 
                     {/* Submit Button */}
-                    {submitStatus === 'error' && (
+                    {submitStatus && submitStatus !== 'success' && (
                         <div className="p-3 bg-red-50 text-red-600 rounded-lg text-sm mb-4">
-                            오류가 발생했습니다. 잠시 후 다시 시도해주세요.
+                            {submitStatus}
                         </div>
                     )}
                     <button
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || !agreed}
                         className="w-full bg-navy-600 hover:bg-navy-800 disabled:opacity-70 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-all shadow-md hover:shadow-lg mt-6 active:scale-[0.98] flex items-center justify-center gap-2"
                     >
                         {isSubmitting ? (
