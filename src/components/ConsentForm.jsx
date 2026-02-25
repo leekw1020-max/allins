@@ -12,6 +12,7 @@ export default function ConsentForm() {
         detailAddress: ''
     });
     const [agreed, setAgreed] = useState(false);
+    const [marketingAgreed, setMarketingAgreed] = useState(false);
     const [showPostcode, setShowPostcode] = useState(false);
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,7 +53,10 @@ export default function ConsentForm() {
         if (!formData.name.trim()) newErrors.name = '이름을 입력해주세요.';
         if (!formData.phone.trim()) newErrors.phone = '연락처를 입력해주세요.';
         if (!formData.address.trim()) newErrors.address = '주소를 검색해주세요.';
-        if (!agreed) newErrors.agreed = '개인정보 수집 및 이용에 동의해야 합니다.';
+        if (!agreed) {
+            newErrors.agreed = '개인정보 수집 및 이용에 동의해야 합니다.';
+            alert('개인정보 수집 및 이용 동의(필수)에 체크해주세요.');
+        }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -83,6 +87,7 @@ export default function ConsentForm() {
                         address: formData.address,
                         detail_address: formData.detailAddress,
                         agreed: agreed,
+                        marketing_agreed: marketingAgreed,
                     }
                 ]);
 
@@ -194,14 +199,14 @@ export default function ConsentForm() {
                     </div>
 
                     {/* Privacy Consent */}
-                    <div className="pt-4 border-t border-gray-100 mt-8">
+                    <div className="pt-4 border-t border-gray-100 mt-8 space-y-4">
                         <button
                             type="button"
                             onClick={() => {
                                 setAgreed(!agreed);
                                 if (errors.agreed) setErrors({ ...errors, agreed: null });
                             }}
-                            className="flex items-start gap-3 w-full text-left focus:outline-none group pb-2"
+                            className="flex items-start gap-3 w-full text-left focus:outline-none group"
                         >
                             <div className={`mt-0.5 flex-shrink-0 ${agreed ? 'text-navy-600' : 'text-gray-400 group-hover:text-gray-500'}`}>
                                 {agreed ? <CheckSquare size={22} className="fill-navy-50" /> : <Square size={22} />}
@@ -214,6 +219,24 @@ export default function ConsentForm() {
                                     ㈜올인스는 고객 상담 및 안내를 위해 위 개인정보를 수집하며, 관계 법령에 따라 안전하게 보관 및 관리합니다.
                                 </p>
                                 {errors.agreed && <p className="text-red-500 text-xs mt-2">{errors.agreed}</p>}
+                            </div>
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setMarketingAgreed(!marketingAgreed)}
+                            className="flex items-start gap-3 w-full text-left focus:outline-none group pb-2"
+                        >
+                            <div className={`mt-0.5 flex-shrink-0 ${marketingAgreed ? 'text-navy-600' : 'text-gray-400 group-hover:text-gray-500'}`}>
+                                {marketingAgreed ? <CheckSquare size={22} className="fill-navy-50" /> : <Square size={22} />}
+                            </div>
+                            <div>
+                                <span className="font-semibold text-gray-800 flex flex-wrap gap-1 text-[15px]">
+                                    (선택) 마케팅 활용 동의
+                                </span>
+                                <p className="text-xs text-gray-500 mt-1.5 leading-relaxed bg-gray-50 p-3 rounded-md border border-gray-100">
+                                    새로운 서비스 및 이벤트, 혜택 등의 안내를 위해 활용됩니다.
+                                </p>
                             </div>
                         </button>
                     </div>
